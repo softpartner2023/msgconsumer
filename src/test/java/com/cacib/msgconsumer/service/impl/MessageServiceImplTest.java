@@ -1,6 +1,7 @@
 package com.cacib.msgconsumer.service.impl;
 
 import com.cacib.msgconsumer.entity.Message;
+import com.cacib.msgconsumer.exception.ResourceNotFoundException;
 import com.cacib.msgconsumer.repository.MessageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,10 +46,10 @@ class MessageServiceImplTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenMessageNotFound() {
+    void shouldThrowResourceNotFoundExceptionWhenMessageNotFound() {
         when(messageRepository.findById(99L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResourceNotFoundException  exception = assertThrows(ResourceNotFoundException.class,
                 () -> messageService.getMessageById(99L));
 
         assertTrue(exception.getMessage().contains("Message not found"));

@@ -71,4 +71,22 @@ class PartnerControllerTest {
         boolean stillExists = partnerRepository.findById(saved.getId()).isPresent();
         assertFalse(stillExists);
     }
+
+    @Test
+    void shouldReturn400WhenAliasAlreadyExists() throws Exception {
+        // Préparer un partenaire avec un alias
+        Partner existing = new Partner(null, "DUPLICATE_ALIAS", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "Existing");
+        partnerRepository.save(existing);
+
+        // Envoyer un POST avec le même alias pour provoquer l'erreur
+        Partner duplicate = new Partner(null, "DUPLICATE_ALIAS", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "Duplicate");
+
+        mockMvc.perform(post("/api/partners")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(duplicate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value(containsString("already exist")));
+    }
 }

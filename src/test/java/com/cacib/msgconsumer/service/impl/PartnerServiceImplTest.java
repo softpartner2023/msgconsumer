@@ -3,6 +3,8 @@ package com.cacib.msgconsumer.service.impl;
 import com.cacib.msgconsumer.entity.Partner;
 import com.cacib.msgconsumer.enums.Direction;
 import com.cacib.msgconsumer.enums.ProcessedFlowType;
+import com.cacib.msgconsumer.exception.BadRequestException;
+import com.cacib.msgconsumer.exception.ResourceNotFoundException;
 import com.cacib.msgconsumer.repository.PartnerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,13 +47,27 @@ class PartnerServiceImplTest {
     }
 
     @Test
-    void shouldThrowIfPartnerNotFound() {
+    void shouldThrowResourceNotFoundExceptionWhenPartnerNotFound() {
         when(partnerRepository.findById(99L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> partnerService.getPartnerById(99L));
 
         assertTrue(exception.getMessage().contains("Partner not found"));
+    }
+
+    @Test
+    void shouldThrowBadRequestExceptionWhenAliasAlreadyExists() {
+        Partner partner = new Partner(null, "DUPLICATE_ALIAS", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "Test");
+
+        when(partnerRepository.existsByAlias("DUPLICATE_ALIAS")).thenReturn(true);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            partnerService.addPartner(partner);
+        });
+
+        assertTrue(exception.getMessage().contains("partner already exist with alias"));
+        verify(partnerRepository, never()).save(any());
     }
 
     @Test

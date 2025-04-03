@@ -1,6 +1,7 @@
 package com.cacib.msgconsumer.service.impl;
 
 import com.cacib.msgconsumer.entity.Message;
+import com.cacib.msgconsumer.exception.ResourceNotFoundException;
 import com.cacib.msgconsumer.repository.MessageRepository;
 import com.cacib.msgconsumer.service.MessageService;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Message getMessageById(Long id) {
         return messageRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Message not found with id : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Message not found with id : " + id));
     }
 
     @Override
