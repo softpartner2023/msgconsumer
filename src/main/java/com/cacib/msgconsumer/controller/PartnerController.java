@@ -1,7 +1,10 @@
 package com.cacib.msgconsumer.controller;
 
+import com.cacib.msgconsumer.dto.PartnerRequestDTO;
+import com.cacib.msgconsumer.dto.PartnerResponseDTO;
 import com.cacib.msgconsumer.entity.Partner;
 import com.cacib.msgconsumer.service.PartnerService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,18 +21,18 @@ public class PartnerController {
     }
 
     @GetMapping
-    public List<Partner> getAllPartners() {
+    public List<PartnerResponseDTO> getAllPartners() {
         return partnerService.getAllPartners();
     }
 
     @GetMapping("/{id}")
-    public Partner getPartnerById(@PathVariable Long id) {
+    public PartnerResponseDTO getPartnerById(@PathVariable Long id) {
         return partnerService.getPartnerById(id);
     }
 
     @PostMapping
-    public Partner addPartner(@RequestBody Partner partner) {
-        return partnerService.addPartner(partner);
+    public PartnerResponseDTO addPartner(@RequestBody @Valid PartnerRequestDTO partnerRequestDTO) {
+        return partnerService.addPartner(partnerRequestDTO);
     }
 
     @DeleteMapping("/{id}")

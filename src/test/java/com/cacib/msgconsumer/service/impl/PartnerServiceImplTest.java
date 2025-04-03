@@ -1,10 +1,13 @@
 package com.cacib.msgconsumer.service.impl;
 
+import com.cacib.msgconsumer.dto.PartnerRequestDTO;
+import com.cacib.msgconsumer.dto.PartnerResponseDTO;
 import com.cacib.msgconsumer.entity.Partner;
 import com.cacib.msgconsumer.enums.Direction;
 import com.cacib.msgconsumer.enums.ProcessedFlowType;
 import com.cacib.msgconsumer.exception.BadRequestException;
 import com.cacib.msgconsumer.exception.ResourceNotFoundException;
+import com.cacib.msgconsumer.mapper.PartnerMapper;
 import com.cacib.msgconsumer.repository.PartnerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,12 +61,12 @@ class PartnerServiceImplTest {
 
     @Test
     void shouldThrowBadRequestExceptionWhenAliasAlreadyExists() {
-        Partner partner = new Partner(null, "DUPLICATE_ALIAS", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "Test");
+        PartnerRequestDTO partnerRequestDTO = new PartnerRequestDTO("DUPLICATE_ALIAS", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "Test");
 
         when(partnerRepository.existsByAlias("DUPLICATE_ALIAS")).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            partnerService.addPartner(partner);
+            partnerService.addPartner(partnerRequestDTO);
         });
 
         assertTrue(exception.getMessage().contains("partner already exist with alias"));
@@ -72,12 +75,13 @@ class PartnerServiceImplTest {
 
     @Test
     void shouldSavePartner() {
-        Partner input = new Partner(null, "Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1");
+        PartnerRequestDTO input = new PartnerRequestDTO("Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1");
+        Partner entityToSave = PartnerMapper.toEntity(input);
         Partner saved = new Partner(1L, "Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1");
 
-        when(partnerRepository.save(input)).thenReturn(saved);
+        when(partnerRepository.save(entityToSave)).thenReturn(saved);
 
-        Partner result = partnerService.addPartner(input);
+        PartnerResponseDTO result = partnerService.addPartner(input);
         assertEquals(1L, result.getId());
     }
 
