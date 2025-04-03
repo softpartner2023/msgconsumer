@@ -1,6 +1,8 @@
 package com.cacib.msgconsumer.controller;
 
 import com.cacib.msgconsumer.entity.Partner;
+import com.cacib.msgconsumer.enums.Direction;
+import com.cacib.msgconsumer.enums.ProcessedFlowType;
 import com.cacib.msgconsumer.repository.PartnerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +38,7 @@ class PartnerControllerTest {
 
     @Test
     void shouldAddPartner() throws Exception {
-        Partner partner = new Partner(null, "AliasX", "TypeA", "INBOUND", "AppX", "MESSAGE", "DescX");
+        Partner partner = new Partner(null, "AliasX", "TypeA", Direction.INBOUND, "AppX", ProcessedFlowType.MESSAGE, "DescX");
 
         mockMvc.perform(post("/api/partners")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -47,8 +49,8 @@ class PartnerControllerTest {
 
     @Test
     void shouldListAllPartners() throws Exception {
-        partnerRepository.save(new Partner(null, "Alias1", "Type1", "INBOUND", "App1", "MESSAGE", "Desc1"));
-        partnerRepository.save(new Partner(null, "Alias2", "Type2", "OUTBOUND", "App2", "ALERTING", "Desc2"));
+        partnerRepository.save(new Partner(null, "Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1"));
+        partnerRepository.save(new Partner(null, "Alias2", "Type2", Direction.OUTBOUND, "App2", ProcessedFlowType.ALERTING, "Desc2"));
 
         mockMvc.perform(get("/api/partners"))
                 .andExpect(status().isOk())
@@ -58,7 +60,7 @@ class PartnerControllerTest {
     @Test
     void shouldDeletePartenaireById() throws Exception {
         // On insère un partenaire dans la BDD
-        Partner partner = new Partner(null, "AliasToDelete", "Type", "INBOUND", "App", "MESSAGE", "to delete");
+        Partner partner = new Partner(null, "AliasToDelete", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "to delete");
         Partner saved = partnerRepository.save(partner);
 
         // On appelle l'API DELETE

@@ -1,6 +1,8 @@
 package com.cacib.msgconsumer.service.impl;
 
 import com.cacib.msgconsumer.entity.Partner;
+import com.cacib.msgconsumer.enums.Direction;
+import com.cacib.msgconsumer.enums.ProcessedFlowType;
 import com.cacib.msgconsumer.repository.PartnerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,8 +26,8 @@ class PartnerServiceImplTest {
     @Test
     void shouldReturnAllPartners() {
         when(partnerRepository.findAll()).thenReturn(Arrays.asList(
-                new Partner(1L, "Alias1", "Type1", "INBOUND", "App1", "MESSAGE", "Desc1"),
-                new Partner(2L, "Alias2", "Type2", "OUTBOUND", "App2", "NOTIFICATION", "Desc2")
+                new Partner(1L, "Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1"),
+                new Partner(2L, "Alias2", "Type2", Direction.OUTBOUND, "App2", ProcessedFlowType.NOTIFICATION, "Desc2")
         ));
 
         var list = partnerService.getAllPartners();
@@ -34,7 +36,7 @@ class PartnerServiceImplTest {
 
     @Test
     void shouldReturnPartnerById() {
-        Partner partner = new Partner(1L, "Alias1", "Type1", "INBOUND", "App1", "MESSAGE", "Desc1");
+        Partner partner = new Partner(1L, "Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1");
 
         when(partnerRepository.findById(1L)).thenReturn(Optional.of(partner));
 
@@ -54,8 +56,8 @@ class PartnerServiceImplTest {
 
     @Test
     void shouldSavePartner() {
-        Partner input = new Partner(null, "Alias1", "Type1", "INBOUND", "App1", "MESSAGE", "Desc1");
-        Partner saved = new Partner(1L, "Alias1", "Type1", "INBOUND", "App1", "MESSAGE", "Desc1");
+        Partner input = new Partner(null, "Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1");
+        Partner saved = new Partner(1L, "Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1");
 
         when(partnerRepository.save(input)).thenReturn(saved);
 

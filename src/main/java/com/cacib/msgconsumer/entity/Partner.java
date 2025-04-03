@@ -1,5 +1,7 @@
 package com.cacib.msgconsumer.entity;
 
+import com.cacib.msgconsumer.enums.Direction;
+import com.cacib.msgconsumer.enums.ProcessedFlowType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,13 +23,15 @@ public class Partner {
     @Column(nullable = false)
     private String type;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String direction; // INBOUND ou OUTBOUND
+    private Direction direction;
 
     private String application;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "processed_flow_type")
-    private String processedFlowType; // MESSAGE, ALERTING, NOTIFICATION
+    private ProcessedFlowType processedFlowType;
 
     @Column(nullable = false)
     private String description;
