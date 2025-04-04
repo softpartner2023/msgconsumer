@@ -1,7 +1,9 @@
 package com.cacib.msgconsumer.controller;
 
+import com.cacib.msgconsumer.dto.MessageResponseDTO;
 import com.cacib.msgconsumer.entity.Message;
 import com.cacib.msgconsumer.service.MessageService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -17,17 +19,17 @@ public class MessageController {
     }
 
     @GetMapping
-    public List<Message> getAllMessages() {
+    public List<MessageResponseDTO> getAllMessages() {
         return messageService.getAllMessages();
     }
 
     @GetMapping("/{id}")
-    public Message getMessageById(@PathVariable Long id) {
+    public MessageResponseDTO getMessageById(@PathVariable Long id) {
         return messageService.getMessageById(id);
     }
 
     @PostMapping
-    public Message saveMessage(@RequestBody Message message) {
+    public MessageResponseDTO saveMessage(@RequestBody @Valid Message message) {
         return messageService.saveMessage(message);
     }
 }

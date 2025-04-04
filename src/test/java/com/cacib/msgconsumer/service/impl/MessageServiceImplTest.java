@@ -1,5 +1,6 @@
 package com.cacib.msgconsumer.service.impl;
 
+import com.cacib.msgconsumer.dto.MessageResponseDTO;
 import com.cacib.msgconsumer.entity.Message;
 import com.cacib.msgconsumer.exception.ResourceNotFoundException;
 import com.cacib.msgconsumer.repository.MessageRepository;
@@ -41,7 +42,7 @@ class MessageServiceImplTest {
 
         when(messageRepository.findById(1L)).thenReturn(Optional.of(msg));
 
-        Message result = messageService.getMessageById(1L);
+        MessageResponseDTO result = messageService.getMessageById(1L);
         assertEquals("Test", result.getContent());
     }
 
@@ -62,7 +63,7 @@ class MessageServiceImplTest {
 
         when(messageRepository.save(input)).thenReturn(saved);
 
-        Message result = messageService.saveMessage(input);
+        MessageResponseDTO result = messageService.saveMessage(input);
         assertEquals(10L, result.getId());
     }
 }
