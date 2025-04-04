@@ -1,5 +1,6 @@
 package com.cacib.msgconsumer.controller;
 
+import com.cacib.msgconsumer.dto.PartnerRequestDTO;
 import com.cacib.msgconsumer.entity.Partner;
 import com.cacib.msgconsumer.enums.Direction;
 import com.cacib.msgconsumer.enums.ProcessedFlowType;
@@ -38,13 +39,13 @@ class PartnerControllerTest {
 
     @Test
     void shouldAddPartner() throws Exception {
-        Partner partner = new Partner(null, "AliasX", "TypeA", Direction.INBOUND, "AppX", ProcessedFlowType.MESSAGE, "DescX");
+        PartnerRequestDTO partner = new PartnerRequestDTO("AliasX", "TypeA", Direction.INBOUND, "AppX", ProcessedFlowType.MESSAGE, "DescX");
 
         mockMvc.perform(post("/api/partners")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(partner)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.alias", is("AliasX")));
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.alias", is("AliasX")));
     }
 
     @Test
@@ -58,28 +59,22 @@ class PartnerControllerTest {
     }
 
     @Test
-    void shouldDeletePartenaireById() throws Exception {
-        // On insère un partenaire dans la BDD
+    void shouldDeletePartnerById() throws Exception {
         Partner partner = new Partner(null, "AliasToDelete", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "to delete");
         Partner saved = partnerRepository.save(partner);
 
-        // On appelle l'API DELETE
         mockMvc.perform(delete("/api/partners/{id}", saved.getId()))
                 .andExpect(status().isOk());
 
-        // Vérifie qu'il n'est plus en base
-        boolean stillExists = partnerRepository.findById(saved.getId()).isPresent();
-        assertFalse(stillExists);
+        assertFalse(partnerRepository.findById(saved.getId()).isPresent());
     }
 
     @Test
     void shouldReturn400WhenAliasAlreadyExists() throws Exception {
-        // Préparer un partenaire avec un alias
         Partner existing = new Partner(null, "DUPLICATE_ALIAS", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "Existing");
         partnerRepository.save(existing);
 
-        // Envoyer un POST avec le même alias pour provoquer l'erreur
-        Partner duplicate = new Partner(null, "DUPLICATE_ALIAS", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "Duplicate");
+        PartnerRequestDTO duplicate = new PartnerRequestDTO("DUPLICATE_ALIAS", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "Duplicate");
 
         mockMvc.perform(post("/api/partners")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -1,5 +1,6 @@
 package com.cacib.msgconsumer.controller;
 
+import com.cacib.msgconsumer.dto.MessageRequestDTO;
 import com.cacib.msgconsumer.entity.Message;
 import com.cacib.msgconsumer.repository.MessageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,7 +36,7 @@ class MessageControllerTest {
 
     @Test
     void shouldCreateAndReturnMessage() throws Exception {
-        Message msg = new Message(null, "Hello", "App1", LocalDateTime.now());
+        MessageRequestDTO msg = new MessageRequestDTO("Hello", "App1");
 
         mockMvc.perform(post("/api/messages")
                         .contentType(MediaType.APPLICATION_JSON)
