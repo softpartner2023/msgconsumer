@@ -8,23 +8,22 @@ import com.cacib.msgconsumer.exception.ResourceNotFoundException;
 import com.cacib.msgconsumer.mapper.PartnerMapper;
 import com.cacib.msgconsumer.repository.PartnerRepository;
 import com.cacib.msgconsumer.service.PartnerService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PartnerServiceImpl implements PartnerService {
 
     private final PartnerRepository partnerRepository;
-
-    public PartnerServiceImpl(PartnerRepository partnerRepository) {
-        this.partnerRepository = partnerRepository;
-    }
+    private final PartnerMapper partnerMapper;
 
     @Override
     public List<PartnerResponseDTO> getAllPartners() {
         return partnerRepository.findAll().stream()
-                .map(PartnerMapper::toResponse)
+                .map(partnerMapper::toPartnerResponseDTO)
                 .collect(Collectors.toList());
     }
 
@@ -32,17 +31,17 @@ public class PartnerServiceImpl implements PartnerService {
     public PartnerResponseDTO getPartnerById(Long id) {
         Partner partner = partnerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Partner not found by id : " + id));
-        return PartnerMapper.toResponse(partner);
+        return partnerMapper.toPartnerResponseDTO(partner);
     }
 
     @Override
     public PartnerResponseDTO addPartner(PartnerRequestDTO partnerRequestDTO) {
-        Partner partner = PartnerMapper.toEntity(partnerRequestDTO);
+        Partner partner = partnerMapper.toEntity(partnerRequestDTO);
         if (partnerRepository.existsByAlias(partner.getAlias())) {
             throw new BadRequestException("partner already exist with alias : " + partner.getAlias());
         }
         Partner partnerSaved = partnerRepository.save(partner);
-        return PartnerMapper.toResponse(partnerSaved);
+        return partnerMapper.toPartnerResponseDTO(partnerSaved);
     }
 
     @Override

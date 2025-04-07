@@ -1,5 +1,7 @@
 package com.cacib.msgconsumer.entity;
 
+import com.cacib.msgconsumer.enums.Direction;
+import com.cacib.msgconsumer.enums.ProcessedFlowType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,8 +21,10 @@ public class Message {
 
     private String content;
 
-    private String origin;
-
     private LocalDateTime receptionDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "partner_id")
+    private Partner partner;
 
 }

@@ -1,8 +1,14 @@
 package com.cacib.msgconsumer.listener;
 
+import com.cacib.msgconsumer.dto.MessageRequestDTO;
+import com.cacib.msgconsumer.dto.MessageResponseDTO;
 import com.cacib.msgconsumer.entity.Message;
 import com.cacib.msgconsumer.repository.MessageRepository;
+import com.cacib.msgconsumer.service.MessageService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -11,19 +17,15 @@ import javax.jms.*;
 import java.time.LocalDateTime;
 
 @Component
+@RequiredArgsConstructor
 public class MqMessageListener {
 
     private static final Logger log = LoggerFactory.getLogger(MqMessageListener.class);
 
     private final ConnectionFactory connectionFactory;
     private final Queue queue;
-    private final MessageRepository messageRepository;
-
-    public MqMessageListener(ConnectionFactory connectionFactory, Queue queue, MessageRepository messageRepository) {
-        this.connectionFactory = connectionFactory;
-        this.queue = queue;
-        this.messageRepository = messageRepository;
-    }
+    private final MessageService messageService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
     public void startListening() {
@@ -38,18 +40,14 @@ public class MqMessageListener {
 
                 while (true) {
                     TextMessage textMessage = (TextMessage) consumer.receive();
-                    String content = textMessage.getText();
+                    String json = textMessage.getText();
+                    log.info("Received raw JSON from MQ: {}", json);
 
-                    log.info("Received message from MQ: {}", content);
+                    MessageRequestDTO msg = objectMapper.readValue(json, MessageRequestDTO.class);
 
-                    Message msg = new Message();
-                    msg.setContent(content);
-                    msg.setOrigin("IBM_MQ");
-                    msg.setReceptionDate(LocalDateTime.now());
+                    MessageResponseDTO msgSaved = messageService.saveMessage(msg);
 
-                    messageRepository.save(msg);
-
-                    log.info("Message saved to database [ID: {}]", msg.getId());
+                    log.info("Message saved to database [ID: {}]", msgSaved.getId());
                 }
 
             } catch (Exception e) {

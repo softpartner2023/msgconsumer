@@ -2,6 +2,7 @@ package com.cacib.msgconsumer.producer;
 
 import com.ibm.mq.jms.MQQueueConnectionFactory;
 import com.ibm.msg.client.wmq.WMQConstants;
+
 import javax.jms.*;
 
 public class MQTestProducer {
@@ -37,7 +38,8 @@ public class MQTestProducer {
             producer = session.createProducer(queue);
 
             // 5. Create a TextMessage and send it
-            TextMessage message = session.createTextMessage("Hello from JMS test!");
+            TextMessage message = session.createTextMessage("{\"content\":\"Hello from JMS test!\",\"partnerAlias\":\"AliasX\"}");
+
             producer.send(message);
             System.out.println("Sent message: " + message.getText());
         } catch (JMSException e) {

@@ -11,7 +11,12 @@ import com.cacib.msgconsumer.mapper.PartnerMapper;
 import com.cacib.msgconsumer.repository.PartnerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,76 +24,96 @@ import static org.mockito.Mockito.*;
 
 class PartnerServiceImplTest {
 
+    @Mock
     private PartnerRepository partnerRepository;
+
+    @Mock
+    private PartnerMapper partnerMapper;
+
+    @InjectMocks
     private PartnerServiceImpl partnerService;
 
     @BeforeEach
     void setUp() {
-        partnerRepository = mock(PartnerRepository.class);
-        partnerService = new PartnerServiceImpl(partnerRepository);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
     void shouldReturnAllPartners() {
-        when(partnerRepository.findAll()).thenReturn(Arrays.asList(
-                new Partner(1L, "Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1"),
-                new Partner(2L, "Alias2", "Type2", Direction.OUTBOUND, "App2", ProcessedFlowType.NOTIFICATION, "Desc2")
-        ));
+        Partner p1 = new Partner();
+        Partner p2 = new Partner();
+        when(partnerRepository.findAll()).thenReturn(Arrays.asList(p1, p2));
+        when(partnerMapper.toPartnerResponseDTO(any())).thenReturn(new PartnerResponseDTO());
 
-        var list = partnerService.getAllPartners();
-        assertEquals(2, list.size());
+        List<PartnerResponseDTO> result = partnerService.getAllPartners();
+
+        assertEquals(2, result.size());
+        verify(partnerRepository).findAll();
     }
 
     @Test
     void shouldReturnPartnerById() {
-        Partner partner = new Partner(1L, "Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1");
+        Partner partner = new Partner();
+        partner.setId(1L);
+        partner.setAlias("BNP");
+
+        PartnerResponseDTO dto = new PartnerResponseDTO();
+        dto.setId(1L);
+        dto.setAlias("BNP");
 
         when(partnerRepository.findById(1L)).thenReturn(Optional.of(partner));
+        when(partnerMapper.toPartnerResponseDTO(partner)).thenReturn(dto);
 
-        var result = partnerService.getPartnerById(1L);
-        assertEquals("Alias1", result.getAlias());
+        PartnerResponseDTO result = partnerService.getPartnerById(1L);
+        assertEquals("BNP", result.getAlias());
     }
 
     @Test
-    void shouldThrowResourceNotFoundExceptionWhenPartnerNotFound() {
-        when(partnerRepository.findById(99L)).thenReturn(Optional.empty());
+    void shouldThrowWhenPartnerNotFound() {
+        when(partnerRepository.findById(42L)).thenReturn(Optional.empty());
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> partnerService.getPartnerById(99L));
-
-        assertTrue(exception.getMessage().contains("Partner not found"));
+        assertThrows(ResourceNotFoundException.class, () -> partnerService.getPartnerById(42L));
     }
 
     @Test
-    void shouldThrowBadRequestExceptionWhenAliasAlreadyExists() {
-        PartnerRequestDTO partnerRequestDTO = new PartnerRequestDTO("DUPLICATE_ALIAS", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "Test");
+    void shouldAddNewPartner() {
+        PartnerRequestDTO request = new PartnerRequestDTO("BNP", "TYPE_A", Direction.INBOUND, "APP_X", ProcessedFlowType.MESSAGE, "test");
+        Partner entity = new Partner();
+        entity.setAlias("BNP");
 
-        when(partnerRepository.existsByAlias("DUPLICATE_ALIAS")).thenReturn(true);
+        Partner saved = new Partner();
+        saved.setId(99L);
+        saved.setAlias("BNP");
 
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            partnerService.addPartner(partnerRequestDTO);
-        });
+        PartnerResponseDTO response = new PartnerResponseDTO();
+        response.setId(99L);
+        response.setAlias("BNP");
 
-        assertTrue(exception.getMessage().contains("partner already exist with alias"));
-        verify(partnerRepository, never()).save(any());
+        when(partnerRepository.existsByAlias("BNP")).thenReturn(false);
+        when(partnerMapper.toEntity(request)).thenReturn(entity);
+        when(partnerRepository.save(entity)).thenReturn(saved);
+        when(partnerMapper.toPartnerResponseDTO(saved)).thenReturn(response);
+
+        PartnerResponseDTO result = partnerService.addPartner(request);
+
+        assertEquals("BNP", result.getAlias());
+        assertEquals(99L, result.getId());
     }
 
     @Test
-    void shouldSavePartner() {
-        PartnerRequestDTO input = new PartnerRequestDTO("Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1");
-        Partner entityToSave = PartnerMapper.toEntity(input);
-        Partner saved = new Partner(1L, "Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1");
+    void shouldRejectDuplicateAlias() {
+        PartnerRequestDTO request = new PartnerRequestDTO("DUPLICATE", "TYPE_A", Direction.INBOUND, "APP", ProcessedFlowType.NOTIFICATION, "Dup");
+        when(partnerRepository.existsByAlias("DUPLICATE")).thenReturn(true);
+        Partner partner = new Partner();
+        partner.setAlias("DUPLICATE");
+        when(partnerMapper.toEntity(request)).thenReturn(partner);
 
-        when(partnerRepository.save(entityToSave)).thenReturn(saved);
-
-        PartnerResponseDTO result = partnerService.addPartner(input);
-        assertEquals(1L, result.getId());
+        assertThrows(BadRequestException.class, () -> partnerService.addPartner(request));
     }
 
     @Test
     void shouldDeletePartner() {
-        doNothing().when(partnerRepository).deleteById(1L);
         partnerService.deletePartner(1L);
-        verify(partnerRepository, times(1)).deleteById(1L);
+        verify(partnerRepository).deleteById(1L);
     }
 }

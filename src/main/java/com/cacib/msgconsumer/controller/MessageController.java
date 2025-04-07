@@ -1,5 +1,6 @@
 package com.cacib.msgconsumer.controller;
 
+import com.cacib.msgconsumer.dto.MessageRequestDTO;
 import com.cacib.msgconsumer.dto.MessageResponseDTO;
 import com.cacib.msgconsumer.entity.Message;
 import com.cacib.msgconsumer.service.MessageService;
@@ -28,8 +29,4 @@ public class MessageController {
         return messageService.getMessageById(id);
     }
 
-    @PostMapping
-    public MessageResponseDTO saveMessage(@RequestBody @Valid Message message) {
-        return messageService.saveMessage(message);
-    }
 }

@@ -14,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
+
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -50,8 +52,8 @@ class PartnerControllerTest {
 
     @Test
     void shouldListAllPartners() throws Exception {
-        partnerRepository.save(new Partner(null, "Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1"));
-        partnerRepository.save(new Partner(null, "Alias2", "Type2", Direction.OUTBOUND, "App2", ProcessedFlowType.ALERTING, "Desc2"));
+        partnerRepository.save(new Partner(null, "Alias1", "Type1", Direction.INBOUND, "App1", ProcessedFlowType.MESSAGE, "Desc1", new ArrayList<>()));
+        partnerRepository.save(new Partner(null, "Alias2", "Type2", Direction.OUTBOUND, "App2", ProcessedFlowType.ALERTING, "Desc2", new ArrayList<>()));
 
         mockMvc.perform(get("/api/partners"))
                 .andExpect(status().isOk())
@@ -60,7 +62,7 @@ class PartnerControllerTest {
 
     @Test
     void shouldDeletePartnerById() throws Exception {
-        Partner partner = new Partner(null, "AliasToDelete", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "to delete");
+        Partner partner = new Partner(null, "AliasToDelete", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "to delete", new ArrayList<>());
         Partner saved = partnerRepository.save(partner);
 
         mockMvc.perform(delete("/api/partners/{id}", saved.getId()))
@@ -71,7 +73,7 @@ class PartnerControllerTest {
 
     @Test
     void shouldReturn400WhenAliasAlreadyExists() throws Exception {
-        Partner existing = new Partner(null, "DUPLICATE_ALIAS", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "Existing");
+        Partner existing = new Partner(null, "DUPLICATE_ALIAS", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "Existing", new ArrayList<>());
         partnerRepository.save(existing);
 
         PartnerRequestDTO duplicate = new PartnerRequestDTO("DUPLICATE_ALIAS", "Type", Direction.INBOUND, "App", ProcessedFlowType.MESSAGE, "Duplicate");

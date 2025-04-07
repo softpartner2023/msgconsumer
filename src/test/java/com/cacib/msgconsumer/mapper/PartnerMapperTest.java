@@ -6,10 +6,13 @@ import com.cacib.msgconsumer.entity.Partner;
 import com.cacib.msgconsumer.enums.Direction;
 import com.cacib.msgconsumer.enums.ProcessedFlowType;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class PartnerMapperTest {
+
+    private final PartnerMapper mapper = Mappers.getMapper(PartnerMapper.class);
 
     @Test
     void shouldMapRequestDtoToEntity() {
@@ -21,9 +24,9 @@ class PartnerMapperTest {
         dto.setProcessedFlowType(ProcessedFlowType.ALERTING);
         dto.setDescription("Test partner");
 
-        Partner entity = PartnerMapper.toEntity(dto);
+        Partner entity = mapper.toEntity(dto);
 
-        assertNull(entity.getId()); // Pas encore persisté
+        assertNull(entity.getId());
         assertEquals(dto.getAlias(), entity.getAlias());
         assertEquals(dto.getType(), entity.getType());
         assertEquals(dto.getDirection(), entity.getDirection());
@@ -43,7 +46,7 @@ class PartnerMapperTest {
         entity.setProcessedFlowType(ProcessedFlowType.NOTIFICATION);
         entity.setDescription("Desc de test");
 
-        PartnerResponseDTO dto = PartnerMapper.toResponse(entity);
+        PartnerResponseDTO dto = mapper.toPartnerResponseDTO(entity);
 
         assertEquals(entity.getId(), dto.getId());
         assertEquals(entity.getAlias(), dto.getAlias());

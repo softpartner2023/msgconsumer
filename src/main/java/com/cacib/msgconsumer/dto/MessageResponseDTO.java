@@ -1,6 +1,7 @@
 package com.cacib.msgconsumer.dto;
 
 
+import com.cacib.msgconsumer.entity.Partner;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ public class MessageResponseDTO {
 
     private String content;
 
-    private String origin;
-
     private LocalDateTime receptionDate;
+
+    private PartnerResponseDTO partner;
 }

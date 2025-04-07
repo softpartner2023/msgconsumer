@@ -2,7 +2,11 @@ package com.cacib.msgconsumer.controller;
 
 import com.cacib.msgconsumer.dto.MessageRequestDTO;
 import com.cacib.msgconsumer.entity.Message;
+import com.cacib.msgconsumer.entity.Partner;
+import com.cacib.msgconsumer.enums.Direction;
+import com.cacib.msgconsumer.enums.ProcessedFlowType;
 import com.cacib.msgconsumer.repository.MessageRepository;
+import com.cacib.msgconsumer.repository.PartnerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
+
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -27,32 +32,47 @@ class MessageControllerTest {
     private MessageRepository messageRepository;
 
     @Autowired
+    private PartnerRepository partnerRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void cleanDb() {
         messageRepository.deleteAll();
-    }
-
-    @Test
-    void shouldCreateAndReturnMessage() throws Exception {
-        MessageRequestDTO msg = new MessageRequestDTO("Hello", "App1");
-
-        mockMvc.perform(post("/api/messages")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(msg)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", is("Hello")))
-                .andExpect(jsonPath("$.origin", is("App1")));
+        partnerRepository.deleteAll();
     }
 
     @Test
     void shouldReturnAllMessages() throws Exception {
-        messageRepository.save(new Message(null, "Hello", "A", LocalDateTime.now()));
-        messageRepository.save(new Message(null, "World", "B", LocalDateTime.now()));
+        // Given
+        Partner partner = new Partner();
+        partner.setAlias("CA");
+        partner.setType("INTERNE");
+        partner.setApplication("Trade");
+        partner.setDirection(Direction.OUTBOUND);
+        partner.setProcessedFlowType(ProcessedFlowType.NOTIFICATION);
+        partner.setDescription("Crédit Agricole");
 
+        partnerRepository.save(partner);
+
+        Message msg1 = new Message();
+        msg1.setContent("msg1");
+        msg1.setReceptionDate(LocalDateTime.now());
+        msg1.setPartner(partner);
+
+        Message msg2 = new Message();
+        msg2.setContent("msg2");
+        msg2.setReceptionDate(LocalDateTime.now());
+        msg2.setPartner(partner);
+
+        messageRepository.save(msg1);
+        messageRepository.save(msg2);
+
+        // When + Then
         mockMvc.perform(get("/api/messages"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()", is(2)));
+                .andExpect(jsonPath("$.length()", is(2)))
+                .andExpect(jsonPath("$[0].partner.alias", is("CA")));
     }
 }
