@@ -80,11 +80,11 @@ class MessageServiceImplTest {
     void shouldSaveMessage() {
         MessageRequestDTO dto = new MessageRequestDTO();
         dto.setContent("Test MQ");
-        dto.setPartnerAlias("BNP");
+        dto.setPartnerAlias("CACIB");
 
         Partner partner = new Partner();
         partner.setId(1L);
-        partner.setAlias("BNP");
+        partner.setAlias("CACIB");
 
         Message message = new Message();
         message.setContent("Test MQ");
@@ -92,7 +92,7 @@ class MessageServiceImplTest {
 
         MessageResponseDTO responseDTO = new MessageResponseDTO(10L, "Test MQ", LocalDateTime.now(), new PartnerResponseDTO());
 
-        when(partnerRepository.findByAlias("BNP")).thenReturn(Optional.of(partner));
+        when(partnerRepository.findByAlias("CACIB")).thenReturn(Optional.of(partner));
         when(messageMapper.toEntity(dto)).thenReturn(message);
         when(messageRepository.save(any(Message.class))).thenReturn(message);
         when(messageMapper.toMessageResponseDTO(message)).thenReturn(responseDTO);

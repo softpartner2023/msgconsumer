@@ -21,13 +21,13 @@ class MessageMapperTest {
     void shouldMapMessageRequestDtoToEntity() {
         MessageRequestDTO dto = new MessageRequestDTO();
         dto.setContent("Test message");
-        dto.setPartnerAlias("BNP");
+        dto.setPartnerAlias("CACIB");
 
         Message entity = mapper.toEntity(dto);
 
         assertEquals("Test message", entity.getContent());
         assertNotNull(entity.getPartner());
-        assertEquals("BNP", entity.getPartner().getAlias());
+        assertEquals("CACIB", entity.getPartner().getAlias());
         assertNull(entity.getId());  // ignored
         assertNull(entity.getReceptionDate());  // ignored
     }

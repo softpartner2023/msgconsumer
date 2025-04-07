@@ -55,17 +55,17 @@ class PartnerServiceImplTest {
     void shouldReturnPartnerById() {
         Partner partner = new Partner();
         partner.setId(1L);
-        partner.setAlias("BNP");
+        partner.setAlias("CACIB");
 
         PartnerResponseDTO dto = new PartnerResponseDTO();
         dto.setId(1L);
-        dto.setAlias("BNP");
+        dto.setAlias("CACIB");
 
         when(partnerRepository.findById(1L)).thenReturn(Optional.of(partner));
         when(partnerMapper.toPartnerResponseDTO(partner)).thenReturn(dto);
 
         PartnerResponseDTO result = partnerService.getPartnerById(1L);
-        assertEquals("BNP", result.getAlias());
+        assertEquals("CACIB", result.getAlias());
     }
 
     @Test
@@ -77,26 +77,26 @@ class PartnerServiceImplTest {
 
     @Test
     void shouldAddNewPartner() {
-        PartnerRequestDTO request = new PartnerRequestDTO("BNP", "TYPE_A", Direction.INBOUND, "APP_X", ProcessedFlowType.MESSAGE, "test");
+        PartnerRequestDTO request = new PartnerRequestDTO("CACIB", "TYPE_A", Direction.INBOUND, "APP_X", ProcessedFlowType.MESSAGE, "test");
         Partner entity = new Partner();
-        entity.setAlias("BNP");
+        entity.setAlias("CACIB");
 
         Partner saved = new Partner();
         saved.setId(99L);
-        saved.setAlias("BNP");
+        saved.setAlias("CACIB");
 
         PartnerResponseDTO response = new PartnerResponseDTO();
         response.setId(99L);
-        response.setAlias("BNP");
+        response.setAlias("CACIB");
 
-        when(partnerRepository.existsByAlias("BNP")).thenReturn(false);
+        when(partnerRepository.existsByAlias("CACIB")).thenReturn(false);
         when(partnerMapper.toEntity(request)).thenReturn(entity);
         when(partnerRepository.save(entity)).thenReturn(saved);
         when(partnerMapper.toPartnerResponseDTO(saved)).thenReturn(response);
 
         PartnerResponseDTO result = partnerService.addPartner(request);
 
-        assertEquals("BNP", result.getAlias());
+        assertEquals("CACIB", result.getAlias());
         assertEquals(99L, result.getId());
     }
 
